@@ -1,57 +1,98 @@
 import React, {useState} from 'react';
-import {SafeAreaView,View,FlatList } from 'react-native';
+
 import {MyButton, MyInput, ListItem} from './components'
 
-const App=()=> {
- 
-  const [list, setlist] = useState([])
-  const [todos, setTodos] = useState({todo: '', isDone: true },)
+import {
+  SafeAreaView,
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+  KeyboardAvoidingView
+} from 'react-native'
 
-  textChanger = (getName) => {
-    todos.isDone = true
-    todos.todo = getName
-    setTodos(todos)
+
+
+const App = () => {
+
+  const [entry, setEntry] = useState('');
+  const [list, setList] = useState([]);
+
+  changeTextHandler = (text) => {
+    setEntry(text);
+    console.log('changeHandler')
   }
 
-  setName =()=>{
-    let newTodo = [...list]
-    newTodo.push({todo:todos.todo, isDone:todos.isDone})
-    setlist(newTodo)
+  isDoneHandler = (index) => {
+    let newList = [...list];
+    newList[index].isDone = !(newList[0].isDone);
+    setList(newList);
   }
 
-  selected =(item)=>{
-    let newList = [...list]
-    item.isDone = item.isDone ? 0 : 1
-    setlist(newList)
+  addToList = () => {
+    let newList = [...list];
+    newList.push({ myEntry: entry ,isDone:false});
+    setList(newList);
+    console.log('addToList')
   }
+
 
   return (
-    <View style={{backgroundColor:"#c1d5e0", flex:1}}>
-
-    <SafeAreaView>
-
-     <FlatList
-     keyExtractor={(item,index)=>index.toString()}
-      data={list}
-      renderItem={({ item }) => (
-        <ListItem
-            MyData={item}
-            onSelect={selected}/>
-      )}/>
-
-        <View>
-
-          <MyInput myPlace='What ToDo ?' textChange={textChanger}/>
-          <MyButton myTitle='Add to list' myPress={setName}/>
-
+    <SafeAreaView style={styles.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : null}
+        style={styles.container}
+      >
+        <View style={styles.topContainer}>
+          <Text style={styles.headerText}>ALL TASKS</Text>
         </View>
-
+        <View style={styles.bodyContainer}>
+          <FlatList
+            keyExtractor={(item, index) => index.toString()}
+            data={list}
+            renderItem={
+              ({ item, index }) => <ListItem data={item} itemIndex ={index} myClick ={isDoneHandler}/>
+            }
+          />
+        </View>
+        <View style={styles.bottomContainer}>
+          <MyInput changeText={changeTextHandler} myTitle={entry} />
+          <MyButton myTitle="Add" myPress={addToList} />
+        </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
-
-    </View>
   );
-};
 
+}
 
+export default App;
 
-export {App};
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  topContainer: {
+    alignItems: "center"
+  },
+  headerText: {
+    color: '#29b6f6',
+    fontSize: 20,
+    fontWeight: '600',
+  },
+  bodyContainer: {
+    flex: 1,
+    paddingHorizontal: 10,
+  },
+  bottomContainer: {
+    padding: 10,
+    bottom: 0,
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    width: Dimensions.get('window').width,
+  }
+
+})
